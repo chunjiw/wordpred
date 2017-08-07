@@ -1,0 +1,60 @@
+---
+title: "Quiz1"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+```
+This is my solution to the first quize of the John Hopkins University Coursera course data science capstone project. You are strongly encouraged to solve it by yourself first.
+
+1. the `en_US.blogs.txt` file is how many megabytes?
+
+```{r}
+
+file.info('en_US.blogs.txt')$size /1024/1024
+
+```
+2. The `en_US.twitter.txt` has how many lines of text?
+
+```{r}
+con <- file('en_US.twitter.txt')
+length(readLines(con))
+
+```
+
+3. What is the length of the longest line seen in any of the three en_US data sets?
+
+```{r}
+# wc -L filename without using R is the fastest way
+con <- file("en_US.blogs.txt",open = "r")
+lines <- readLines(con)
+max(nchar(lines))
+con <- file("en_US.news.txt",open = "r")
+lines <- readLines(con)
+max(nchar(lines))
+con <- file("en_US.twitter.txt",open = "r")
+twitterlines <- readLines(con)
+max(nchar(twitterlines))
+```
+
+4. In the `en_US twitter` data set,  if you divide the number of lines where the word "love" (all lowercase) occurs by the number of lines the word "hate" (all lowercase) occurs, about what do you get?
+
+```{r}
+length(grep("love",twitterlines))/length(grep("hate",twitterlines))
+```
+5. The one tweet in the en_US twitter data set that matches the word "biostats" says what?
+
+```{r}
+twitterlines[grep("biostats",twitterlines)]
+# I don't know which is the right answer.
+```
+
+6. How many tweets have the exact characters "A computer once beat me at chess, but it was no match for me at kickboxing". (I.e. the line matches those characters exactly.)
+
+```{r}
+grep("A computer once beat me at chess, but it was no match for me at kickboxing",twitterlines)
+```
+
+
