@@ -1,0 +1,112 @@
+---
+title: "milestone_report"
+output: html_notebook
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(cache = TRUE)
+```
+
+This is my solution to the Johns Hopkins U Data Science Capstone Project milestone report. You are strongly to work on it by yourself before continue reading, unless you are grading of course.
+
+### Importing packages
+```{r}
+library(dplyr)
+library(ggplot2)
+library(tm)
+library(tidytext)
+library(stringr)
+```
+
+### loading data.
+```{r}
+newstext<- readLines(file("en_US/en_US.news.txt", open = "r"))
+twittertext <- readLines(file("en_US/en_US.twitter.txt", open = "r"))
+blogtext <- readLines(file("en_US/en_US.blogs.txt", open = "r"))
+```
+
+### basic analysis of line count and word count
+
+```{r}
+# line count
+length(nchar(newstext))
+length(nchar(twittertext))
+length(nchar(blogtext))
+```
+#### distribution of line count
+```{r}
+newsdf <- as.data.frame(nchar(newstext))
+twitterdf <- as.data.frame(nchar(twittertext))
+blogdf <- as.data.frame(nchar(blogtext))
+newsdf$type <- "news"
+twitterdf$type <- "twitter"
+blogdf$type <-"blog"
+colnames(newsdf) <- c("lineLen","type")
+colnames(blogdf) <- c("lineLen","type")
+colnames(twitterdf) <- c("lineLen","type")
+linedata <- rbind(newsdf, blogdf, twitterdf)
+
+ggplot(linedata, aes(lineLen, fill = type)) + 
+  geom_histogram(show.legend = FALSE, bins = 50) +
+  facet_wrap(~type, scales = "free_y") + 
+  xlim(0,1000) 
+# Note, this is solely for the purpose of illustration. As you already know that the longest sentence in blog contains millions of chars.
+
+```
+
+##### It is obvious that most sentences are short but twitter has a limit of 140 characters. news are longerin generall and has a better concentration. blog has a fat tail which may indicate that some writers prefer long long sentences.
+
+#### word count in each line (sentence). The count in each data set doesn't count that much since it depends on the data set's size for each kind.
+```{r}
+# total word count
+sum(str_count(newstext, "\\S+"))
+sum(str_count(twittertext,"\\S+"))
+sum(str_count(blogtext,"\\S+"))
+
+# word in each sentence (line)
+newsword <- as.data.frame(str_count(newstext,"\\S+")) %>% mutate(type = "news") %>% setNames(c("wordCount","type"))
+blogword <- as.data.frame(str_count(blogtext,"\\S+")) %>% mutate(type = "blog") %>% setNames(c("wordCount","type"))
+twitterword <- as.data.frame(str_count(twittertext,"\\S+")) %>% mutate(type = "twitter") %>% setNames(c("wordCount","type"))
+
+worddata<-rbind(blogword,newsword,twitterword)
+
+ggplot(worddata, aes(wordCount, fill = type)) +
+  geom_histogram(show.legend = FALSE, bins = 50)+
+  facet_wrap(~type, scales = "free_y") +
+  xlim(0, 1000) # again for illustrating purpose, remove some data
+
+```
+#### It is clear that blogs and news tend to use longer words than twitter. It may be due to fact that twitter users used many abberviations.
+
+### n-gram analysis using tidytext package
+
+
+#### tokenizing by n-gram. Due to heavy computation workload, I will just put the tokenization of the blog data here.
+
+
+```{r}
+blog_bigram <- as.data.frame(blogtext) %>% unnest_tokens(bigram,blogtext,token = "ngrams", n = 2)
+blog_bigram_count <- blog_bigram %>% count(bigram, sort = TRUE)
+# Note that those commands take very long time to run
+```
+
+```{r}
+blog_bigram_count[1:1000,] %>% ggplot(aes(n)) + geom_histogram(bins = 50)
+
+# Note that the bigram decays very ver fast.
+```
+##### How about removing those very large one, if you check them, they are "stop-words"
+
+```{r}
+blog_bigram_count[1:2000,] %>%
+  filter(n < 20000) %>%
+  ggplot(aes(n)) +
+  geom_histogram(bins=50)
+# looks much better
+```
+
+
+
+
