@@ -1,3 +1,9 @@
 *.zip
 *.html
 *.txt
+
+*.Rdata
+.Rhistory
+en_US\
+todolist.txt
+
