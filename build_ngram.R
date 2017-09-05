@@ -5,12 +5,13 @@ library(hash)
 library(ggplot2)
 
 # load data
+# data availabel here https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip
 message("load data...")
 message(Sys.time())
 setwd(getSrcDirectory(function(){}))
-news <- readLines("en_US/en_US.news.txt", n = -1)
-twitter <- readLines("en_US/en_US.twitter.txt", n = -1)
-blog <- readLines("en_US/en_US.blogs.txt", n = -1)
+news <- readLines("data/en_US/en_US.news.txt", n = -1)
+twitter <- readLines("data/en_US/en_US.twitter.txt", n = -1)
+blog <- readLines("data/en_US/en_US.blogs.txt", n = -1)
 # down sample half 
 news <- news[sample(1:length(news), length(news) / 2)]
 twitter <- twitter[sample(1:length(twitter), length(twitter) / 10)]
@@ -48,11 +49,14 @@ for (i in 1:length(trigram)) {
     name <- strsplit(names(trigram[i]), split = ' ')[[1]]
     key <- paste0(name[1:2], collapse = ' ')
     if (!has.key(key, h)) {
-      h[key] <- name[3]
+      h[key] <- list(name[3])
+    } else {
+      h[key] <- append(h[[key]], name[3])
     }
   }
 }
-remove(trigram)
+# remove(trigram)
 
-# save hash
+# save ngram model and hash
 save(h, file = "hashtable.Rdata")
+save(trigram, file = "trigram.Rdata")

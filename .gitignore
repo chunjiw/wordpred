@@ -4,6 +4,6 @@
 
 *.Rdata
 .Rhistory
-en_US\
-todolist.txt
+data/
+wordpred/rsconnect/
 
