@@ -9,23 +9,35 @@ ui <- fluidPage(
       textInput("userInput", "Please type here ...")
     ),
     mainPanel(
-      textOutput(outputId = "distPrediction")
+      h3(verbatimTextOutput(outputId = "distPrediction"))
     )
   )
 )
 
 server <- function(input, output) {
   output$distPrediction <- renderText({
-    words <- strsplit(tolower(input$userInput), split = ' ')[[1]]
+    userInput <- trimws(input$userInput)
+    userInput <- gsub('\\s+', ' ', userInput)
+    pred.sentense <- userInput
+    words <- strsplit(tolower(userInput), split = ' ')[[1]]
     if (length(words) >= 2) {
       key <- paste0(tail(words, 2), collapse = ' ')
-      pred.list <- h[[key]]
-      paste(input$userInput, pred.list[[1]], sep = ' ')
-      # paste("..dfasdf.this is userinput: ", input$userInput,
-      #       "...this is the key: ", key,
-      #       "...this is the value: ", value,
-      #       "...this is the output: ", paste(input$userInput, value, sep = ' '))
-    }})
+      pred.char <- h[[key]]
+      pred.char[pred.char == 'i'] <- 'I'
+      if (length(pred.char)) {
+        maxDisplay <- min(5, length(pred.char))
+        for (i in 1:maxDisplay) {
+          pred.sentense <- paste(pred.sentense,
+                                 paste(userInput, pred.char[i], sep = ' '),
+                                 sep = '\n')
+        }
+      }
+      pred.sentense
+    } else {
+      userInput
+    }
+    })
+  
 }
 
 shinyApp(ui = ui, server = server)

@@ -49,9 +49,9 @@ for (i in 1:length(trigram)) {
     name <- strsplit(names(trigram[i]), split = ' ')[[1]]
     key <- paste0(name[1:2], collapse = ' ')
     if (!has.key(key, h)) {
-      h[key] <- list(name[3])
-    } else {
-      h[key] <- append(h[[key]], name[3])
+      h[[key]] <- name[3]
+    } else if (length(h[[key]]) < 15) {
+      h[[key]] <- append(h[[key]], name[3])
     }
   }
 }
