@@ -21,19 +21,20 @@ twit.len <- ceiling(length(twit.full) / nbatch)
 removeURL <- function(x) gsub("http\\S+", "", x)
 removeHash <- function(x) gsub("[@#&]\\S+", "", x)
 # don't know how to remove location, like "@ los angeles"
-removeNumPunct <- function(x) gsub("[^[:alpha:][:space:]']*", "", x)
+removeNumPunct <- function(x) gsub("[^A-z[:space:]']*", "", x)
+# it turns out that Japanese characters belong to [:alpha:], but not [A-z]. Absurd.
 h <- hash()
 
 # loop over batches
-# for (b in 1:nbatch - 1) {
-for (b in 12) {
-  print(sprintf("Processing the %i-th batch", b))
+for (b in 1:nbatch - 1) {
+# for (b in 12932) {
+  message(sprintf("Processing the %i-th batch", b))
   
   # concatenate text and preprocess
   blog <- blog.full[blog.len * b + (1:blog.len)]
   news <- news.full[news.len * b + (1:news.len)]
   twit <- twit.full[twit.len * b + (1:twit.len)]
-  bnt <- c(twit, blog, news) %>% 
+  bnt <- c(blog, news, twit) %>% 
     removeURL() %>% removeHash() %>% 
     removeNumPunct() %>% tolower() %>% stripWhitespace()
   
@@ -63,5 +64,6 @@ for (b in 12) {
 
 if (0) {
   save(h, file = "hashtable.Rdata")
+  save(h, file = "wordpred/hashtable.Rdata")
   save(trigram, file = "trigram.Rdata")
 }

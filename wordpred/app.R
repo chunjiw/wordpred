@@ -21,14 +21,14 @@ server <- function(input, output) {
     pred.sentense <- userInput
     words <- strsplit(tolower(userInput), split = ' ')[[1]]
     if (length(words) >= 2) {
-      key <- paste0(tail(words, 2), collapse = ' ')
-      pred.char <- h[[key]]
-      pred.char[pred.char == 'i'] <- 'I'
-      if (length(pred.char)) {
-        maxDisplay <- min(5, length(pred.char))
+      history <- paste0(tail(words, 2), collapse = ' ')
+      candidates <- h[[history]]$candidate
+      candidates[candidates == 'i'] <- 'I'
+      if (length(candidates)) {
+        maxDisplay <- min(5, length(candidates))
         for (i in 1:maxDisplay) {
           pred.sentense <- paste(pred.sentense,
-                                 paste(userInput, pred.char[i], sep = ' '),
+                                 paste(userInput, candidates[i], sep = ' '),
                                  sep = '\n')
         }
       }
