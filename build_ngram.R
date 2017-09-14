@@ -1,62 +1,67 @@
+library(tidyverse)
 library(tau)
-library(magrittr)
 library(tm)
 library(hash)
-library(ggplot2)
 
 # load data
 # data availabel here https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip
 message("load data...")
 message(Sys.time())
 setwd(getSrcDirectory(function(){}))
-news <- readLines("data/en_US/en_US.news.txt", n = -1)
-twitter <- readLines("data/en_US/en_US.twitter.txt", n = -1)
-blog <- readLines("data/en_US/en_US.blogs.txt", n = -1)
-# down sample half 
-news <- news[sample(1:length(news), length(news) / 2)]
-twitter <- twitter[sample(1:length(twitter), length(twitter) / 10)]
-blog <- blog[sample(1:length(blog), length(blog) / 10)]
+blog.full <- readLines("data/en_US/en_US.blogs.txt")
+news.full <- readLines("data/en_US/en_US.news.txt")
+twit.full <- readLines("data/en_US/en_US.twitter.txt")
+# batch size
+nbatch <- 50
+blog.len <- ceiling(length(blog.full) / nbatch)
+news.len <- ceiling(length(news.full) / nbatch)
+twit.len <- ceiling(length(twit.full) / nbatch)
 
-# preprocessing
-message("preprocessing ...")
-message(Sys.time())
-removeURL <- function(x) {gsub("http\\S+", "", x)}
-removeHash <- function(x) {gsub("[@#&]\\S+", "", x)}
+# preprocessing functions
+removeURL <- function(x) gsub("http\\S+", "", x)
+removeHash <- function(x) gsub("[@#&]\\S+", "", x)
 # don't know how to remove location, like "@ los angeles"
 removeNumPunct <- function(x) gsub("[^[:alpha:][:space:]']*", "", x)
-twitter <- twitter %>% removeURL() %>% removeHash() %>% 
-  removeNumPunct() %>% tolower() %>% stripWhitespace()
-news <- news %>% removeURL() %>% removeHash() %>% 
-  removeNumPunct() %>% tolower() %>% stripWhitespace()
-blog <- blog %>% removeURL() %>% removeHash() %>% 
-  removeNumPunct() %>% tolower() %>% stripWhitespace()
-all <- c(twitter, blog, news)
-remove(twitter, blog, news)
+h <- hash()
 
-# get ngram
-message("get trigram ...")
-message(Sys.time())
-trigram <- textcnt(all, n=3, split=" ", method="string", decreasing = TRUE) 
-
-# create hash table for fast prediction
-message("create hash ...")
-message(Sys.time())
-h = hash()
-for (i in 1:length(trigram)) {
-  if (trigram[i] < 4) {
-    break
-  } else {
-    name <- strsplit(names(trigram[i]), split = ' ')[[1]]
-    key <- paste0(name[1:2], collapse = ' ')
-    if (!has.key(key, h)) {
-      h[[key]] <- name[3]
-    } else if (length(h[[key]]) < 15) {
-      h[[key]] <- append(h[[key]], name[3])
+# loop over batches
+# for (b in 1:nbatch - 1) {
+for (b in 12) {
+  print(sprintf("Processing the %i-th batch", b))
+  
+  # concatenate text and preprocess
+  blog <- blog.full[blog.len * b + (1:blog.len)]
+  news <- news.full[news.len * b + (1:news.len)]
+  twit <- twit.full[twit.len * b + (1:twit.len)]
+  bnt <- c(twit, blog, news) %>% 
+    removeURL() %>% removeHash() %>% 
+    removeNumPunct() %>% tolower() %>% stripWhitespace()
+  
+  # obtain trigram
+  trigram <- textcnt(bnt, n=3, split=" ", method="string", decreasing = TRUE) 
+  
+  # create hash table for fast prediction
+  for (i in 1:length(trigram)) {
+    if (trigram[i] < 4) {
+      break
+    } else {
+      gram <- strsplit(names(trigram[i]), split = ' ')[[1]]
+      history <- paste0(gram[1:2], collapse = ' ')
+      candidate <- gram[3]
+      count <- trigram[[i]]
+      if (candidate %in% h[[history]]$candidate) {
+        index <- h[[history]]$candidate == candidate
+        h[[history]]$count[index] <- h[[history]]$count[index] + count
+      } else {
+        h[[history]]$candidate <- c(h[[history]]$candidate, candidate)
+        h[[history]]$count <- c(h[[history]]$count, count)
+      }
     }
   }
+  gc()
 }
-# remove(trigram)
 
-# save ngram model and hash
-save(h, file = "hashtable.Rdata")
-save(trigram, file = "trigram.Rdata")
+if (0) {
+  save(h, file = "hashtable.Rdata")
+  save(trigram, file = "trigram.Rdata")
+}
