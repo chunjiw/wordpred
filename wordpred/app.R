@@ -6,7 +6,7 @@ ui <- fluidPage(
   titlePanel("Word Prediction via Ngram"),
   sidebarLayout(
     sidebarPanel(
-      textInput("userInput", "Please type here ...")
+      textInput("userInput", "Please type here ... type at least two words to enable prediction.")
     ),
     mainPanel(
       h3(verbatimTextOutput(outputId = "distPrediction"))
