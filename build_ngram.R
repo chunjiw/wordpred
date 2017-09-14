@@ -62,7 +62,7 @@ for (b in 1:nbatch - 1) {
   gc()
 }
 
-if (0) {
+if (1) {
   save(h, file = "hashtable.Rdata")
   save(h, file = "wordpred/hashtable.Rdata")
   save(trigram, file = "trigram.Rdata")
