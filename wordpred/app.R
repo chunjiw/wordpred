@@ -31,9 +31,12 @@ ui <- fluidPage(
     column(8, h3("Join my webinar!"),
            h4("As a member of LEAP-SIG-DS (Special Interest Group of Data Science), 
               I will host a webinar on 14th Sep, Thursday at 9pm to share my experience 
-              making this app. Join us!"),
-           h4(tags$a(href="https://zoom.us/j/935885916", "Click here at 9pm, 14th Sep.")))
-  )
+              making this app."),
+           h4(tags$a(href="https://zoom.us/j/465955864", "Join us!")))
+  ),
+  
+  hr(),
+  h4("Made by Chunji Wang")
 
 )
 
@@ -41,7 +44,7 @@ server <- function(input, output) {
   output$distPrediction <- renderText({
     userInput <- trimws(input$userInput)
     userInput <- gsub('\\s+', ' ', userInput)
-    pred.sentense <- userInput
+    pred.sentense <- paste(userInput, "...")
     words <- strsplit(tolower(userInput), split = ' ')[[1]]
     if (length(words) >= 2) {
       history <- paste0(tail(words, 2), collapse = ' ')
