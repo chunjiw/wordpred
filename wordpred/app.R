@@ -25,15 +25,15 @@ ui <- fluidPage(
                  tags$a(href="https://github.com/chunjiw/wordpred", "here!")))
   ),
   
-  hr(),
-  
-  fluidRow(
-    column(8, h3("Join my webinar!"),
-           h4("As a member of LEAP-SIG-DS (Special Interest Group of Data Science), 
-              I will host a webinar on 14th Sep, Thursday at 9pm to share my experience 
-              making this app."),
-           h4(tags$a(href="https://zoom.us/j/465955864", "Join us!")))
-  ),
+  # hr(),
+  # 
+  # fluidRow(
+  #   column(8, h3("Join my webinar!"),
+  #          h4("As a member of LEAP-SIG-DS (Special Interest Group of Data Science), 
+  #             I will host a webinar on 14th Sep, Thursday at 9pm to share my experience 
+  #             making this app."),
+  #          h4(tags$a(href="https://zoom.us/j/465955864", "Join us!")))
+  # ),
   
   hr(),
   h4("Made by Chunji Wang")
